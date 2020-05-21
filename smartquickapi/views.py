@@ -56,16 +56,22 @@ class Login(TokenObtainPairView):
             return Response({'Error': "Invalid username/password"}, status="400")
         if user:
             payload = {'id': user.id, 'username': user.username}
-            jwt_token = {'token': jwt.encode(payload, env("SECRET_KEY"))}
-            User.objects.raw("update user set is_active = true, token= %s where id = %s" %(jwt['token'], user['id']))
-            # serializer = self.serializer_class(
-            #     user, data=jwt_token, partial=True)
-            # if serializer.is_valid():
-            #     serializer.save()
-            return Response(jwt_token, status=200)
-            # else:
-            #     return Response(serializer.errors, status=400)
-
+            token = jwt.encode(payload, env("SECRET_KEY"))
+            print(token)
+            jwt_token = {'token': token.decode("utf-8")}
+            # User.objects.raw("update user set is_active = true, token= '%s' where id = %s" %(jwt['token'], user['id']))
+            c = connection.cursor()
+            print(user.id, jwt_token['token'] )
+            try:
+                c.execute("UPDATE public.user SET (is_active, token) = ('true','%s') WHERE id=%s RETURNING *;" % (jwt_token['token'],user.id))
+                result = c.fetchone()
+                print(result)
+                return Response(jwt_token, status=200)
+            except Exception as e:
+                print(e)
+                return Response({'error': str(e)},status=500)
+            finally:
+                c.close()
         else:
             return Response({'Error': "Invalid credentials"}, status=400)
 
