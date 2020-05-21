@@ -23,6 +23,12 @@ urlpatterns = [
     # path('users/<str:userId>', views.Users.as_view()),
     path('login', views.Login.as_view()),
 
-    # path('clients', views.Client.as_view()),
+    path('clients', views.Client.as_view()),
+    path('clients/<str:clientId>', views.ClientDetail.as_view()),
+    path('clients/<str:clientId>/bill', views.Bill.as_view()),
+    path('bills/<str:billId>/products', views.Product.as_view()),
+    path('products', views.Product.as_view()),
+    path('products/<str:productId>', views.Product.as_view()),
+
     path('clients/<str:clientId>/exports', views.ClientExport.as_view()),
 ]

@@ -3,7 +3,7 @@ from django.db import models
 
 class User(models.Model):
     
-    username = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(max_length=50, unique=True)
     password = models.CharField(max_length=50, null=False, blank=False)
     token = models.CharField(max_length=300)
     is_active = models.BooleanField(default=False)
@@ -14,7 +14,7 @@ class User(models.Model):
 
 class Client(models.Model):
     
-    document = models.IntegerField(unique=True)
+    document = models.BigIntegerField(unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=100, unique=True)
