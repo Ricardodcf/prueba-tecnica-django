@@ -1,25 +1,19 @@
-import json
-import jwt
+import json, jwt, csv
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponse
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView
 from . import serializers
 from django.db import connection
+from .autentication import TokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
 import environ
 from .models import User, Client
 env = environ.Env()
 base = environ.Path(__file__) - 2
 environ.Env.read_env(env_file=base('.env'))
-
-
-class Prueba(APIView):
-
-    def get(self, req):
-        print('llego aqui!')
-        return Response({'success': True}, 201)
-
 
 class Users(APIView):
 
@@ -76,6 +70,26 @@ class Login(TokenObtainPairView):
             return Response({'Error': "Invalid credentials"}, status=400)
 
 
-# class Client(APIView):
-    # permission_classes = (IsAuthenticated,)
-#     def get(self, req):
+class ClientExport(APIView):
+
+    def get(self, req, clientId):
+
+        
+        c = connection.cursor()
+        try:
+            c.execute("SELECT c.document, CONCAT(c.first_name, ' ', c.last_name) as fullname, COUNT(bill.client_id) as number from client c inner join bill on (c.id = bill.client_id) group by c.document, fullname")
+            result = c.fetchone()
+            print(result)
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="facturas.csv"'
+            writer = csv.writer(response)
+
+            writer.writerow(['Documento', 'Nombre completo', 'Cantidad de facturas'])
+            writer.writerow(result)
+            return response 
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)},status=500)
+        finally:
+            c.close()
+        

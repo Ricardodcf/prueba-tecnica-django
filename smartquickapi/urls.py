@@ -19,10 +19,10 @@ from rest_framework import routers
 
 
 urlpatterns = [
-    # path('test', views.Prueba.as_view())
     path('users', views.Users.as_view()),
-    path('users/<str:userId>', views.Users.as_view()),
+    # path('users/<str:userId>', views.Users.as_view()),
     path('login', views.Login.as_view()),
 
     # path('clients', views.Client.as_view()),
+    path('clients/<str:clientId>/exports', views.ClientExport.as_view()),
 ]
